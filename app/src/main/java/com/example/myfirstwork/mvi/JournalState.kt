@@ -6,5 +6,6 @@ import com.example.myfirstwork.data.model.Journal
 data class JournalState(
     val writingText: String = "",
     val todayJournal: Journal? = null,
+    val isEditing: Boolean = false,
     val journals : List<Journal> = emptyList()
 )

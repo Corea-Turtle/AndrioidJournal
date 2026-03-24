@@ -61,8 +61,12 @@ class JournalViewModel(
             }
 
             JournalIntent.OnUpdate -> {
-
+                val text = state.value.todayJournal?.content?: ""
+                _state.update {
+                    it.copy(isEditing = true, writingText = text)
+                }
             }
+            else -> {}
         }
     }
 
@@ -95,6 +99,11 @@ class JournalViewModel(
     private fun save() {
         Log.d("TAG", "save: ")
         viewModelScope.launch {
+            if(state.value.isEditing) {
+                _state.update {
+                    it.copy(isEditing = false)
+                }
+            }
             //저장 로직은 레포지토리에 맡긴다.
             repository.saveJournal(date = LocalDate.now().toString(),
                 content = state.value.writingText)

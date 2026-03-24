@@ -31,16 +31,28 @@ fun JournalContent(state: JournalState,
             Column(modifier = Modifier.background(Color.Yellow)){
                 Text("오늘 작성한 일기 / ${state.todayJournal.date}")
                 Text("오늘 작성한 일기 / ${state.todayJournal.content}")
-                Row() {
+                if(state.isEditing) {
+                    TextField(value = state.writingText,
+                        onValueChange = { input ->
+                            onIntent(JournalIntent.OnTextChange(input))
+                        })
                     ElevatedButton({
-
-                    }) {
-                        Text("수정")
+                        onIntent(JournalIntent.OnSave) //1.
+                    })  {
+                        Text("수정완료")
                     }
-                    ElevatedButton({
-                        onIntent(JournalIntent.OnDelete)
-                    }){
-                        Text("삭제")
+                }else {
+                    Row() {
+                        ElevatedButton({
+                            onIntent(JournalIntent.OnUpdate)
+                        }) {
+                            Text("수정")
+                        }
+                        ElevatedButton({
+                            onIntent(JournalIntent.OnDelete)
+                        }) {
+                            Text("삭제")
+                        }
                     }
                 }
             }
