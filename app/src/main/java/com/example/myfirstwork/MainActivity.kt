@@ -31,11 +31,8 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             MyFirstWorkTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    JournalScreen(
-                        viewModel = viewModel,
-                        modifier = Modifier.padding(innerPadding))
-                }
+                JournalScreen(viewModel)
+
             }
         }
     }

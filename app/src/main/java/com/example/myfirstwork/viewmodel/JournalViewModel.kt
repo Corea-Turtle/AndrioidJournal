@@ -3,7 +3,6 @@ package com.example.myfirstwork.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.myfirstwork.data.datastore.JournalDataStore
 import com.example.myfirstwork.data.model.Journal
 import com.example.myfirstwork.data.repository.JournalRepository
 import com.example.myfirstwork.mvi.JournalIntent
@@ -12,7 +11,6 @@ import com.example.myfirstwork.mvi.JournalState
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.compose
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -30,12 +28,18 @@ class JournalViewModel(
     private val _sideEffect = Channel<JournalSideEffect> {}
     val sideEffect = _sideEffect.receiveAsFlow()
 
+    private var deletedJournal : Journal? = null
+
     init {
         viewModelScope.launch {
             repository.journals.collect { storedJournals ->
                 Log.d("TAG", "저장된 journals: ${storedJournals}")
+
+                val todayString = LocalDate.now().toString()
+                val todayJournal = storedJournals.find { it.date == todayString }
+
                 _state.update {
-                    it.copy(journals = storedJournals)
+                    it.copy(journals = storedJournals, todayJournal = todayJournal)
                 }
             }
         }
@@ -51,6 +55,39 @@ class JournalViewModel(
             JournalIntent.OnSave -> {
                 save() //3
             }
+
+            JournalIntent.OnDelete -> {
+                delete()
+            }
+
+            JournalIntent.OnUpdate -> {
+
+            }
+        }
+    }
+
+    //삭제복구 로직
+    fun undoDelete() {
+        Log.d("TAG", "undoDelete: ")
+
+        val journal = this.deletedJournal ?: return
+
+        viewModelScope.launch {
+            repository.saveJournal(date = journal.date, content = journal.content)
+            _sideEffect.send(JournalSideEffect.ShowToast("복구되었습니다."))
+        }
+    }
+
+    //삭제로직
+    private fun delete() {
+        Log.d("TAG", "delete: ")
+
+        this.deletedJournal = state.value.todayJournal
+
+        viewModelScope.launch{
+            //삭제한다.
+            repository.deleteJournal(LocalDate.now().toString())
+            _sideEffect.send(JournalSideEffect.ShowUndoSnackbar)
         }
     }
 

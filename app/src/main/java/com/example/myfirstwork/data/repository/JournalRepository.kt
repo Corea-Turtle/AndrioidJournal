@@ -20,4 +20,10 @@ class JournalRepository(
 
         dataStore.save(updatedJournals)
     }
+
+    suspend fun deleteJournal(date: String) {
+        //
+        val updated = dataStore.journalsFlow().first().filterNot { it.date == date }
+        dataStore.save(updated)
+    }
 }
