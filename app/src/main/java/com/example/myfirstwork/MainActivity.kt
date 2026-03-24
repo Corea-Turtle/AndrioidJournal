@@ -11,6 +11,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.example.myfirstwork.data.datastore.JournalDataStore
+import com.example.myfirstwork.data.datastore.journalDataStore
+import com.example.myfirstwork.data.repository.JournalRepository
 import com.example.myfirstwork.ui.screens.JournalScreen
 import com.example.myfirstwork.ui.theme.MyFirstWorkTheme
 import com.example.myfirstwork.viewmodel.JournalViewModel
@@ -20,7 +23,11 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        val viewModel = JournalViewModel()
+        val dataStore = JournalDataStore(applicationContext.journalDataStore)
+
+        val repository = JournalRepository(dataStore)
+
+        val viewModel = JournalViewModel(repository)
 
         setContent {
             MyFirstWorkTheme {
@@ -31,21 +38,5 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    MyFirstWorkTheme {
-        Greeting("Android")
     }
 }

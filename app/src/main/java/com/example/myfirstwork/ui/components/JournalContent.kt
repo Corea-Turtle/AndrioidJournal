@@ -2,6 +2,8 @@ package com.example.myfirstwork.ui.components
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -25,17 +27,16 @@ fun JournalContent(state: JournalState,
                 onIntent(JournalIntent.OnTextChange(input))
             })
         ElevatedButton({
-            onIntent(JournalIntent.OnSave)
+            onIntent(JournalIntent.OnSave) //1.
         })  {
-            Text("")
+            Text("저장")
         }
-        Text(text = "테스트 1")
-        Text(text = "테스트 1")
-        Text(text = "테스트 1")
-        Text(text = "테스트 1")
-        Text(text = "테스트 1")
-        Text(text = "테스트 1")
-        Text(text = "테스트 1")
+
+        LazyColumn {
+            items(state.journals) { journal ->
+                Text("✅ ${journal.date} - ${journal.content}")
+            }
+        }
 
     }
 }

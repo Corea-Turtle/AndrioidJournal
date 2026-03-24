@@ -24,9 +24,9 @@ fun JournalScreen(viewModel: JournalViewModel, modifier: Modifier) {
         viewModel.sideEffect.collect { effect ->
             val toastMessage = when ( effect ) {
                 JournalSideEffect.ShowSavedToast -> "저장되었습니다."
-                else -> ""
+                else -> "저장이 실패하였습니다."
             }
-            Toast.makeText(context, toastMessage, Toast.LENGTH_SHORT)
+            Toast.makeText(context, toastMessage, Toast.LENGTH_SHORT).show()
         }
     }
 
