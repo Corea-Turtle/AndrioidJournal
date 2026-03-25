@@ -37,14 +37,14 @@ fun JournalContent(state: JournalState,
                             onIntent(JournalIntent.OnTextChange(input))
                         })
                     ElevatedButton({
-                        onIntent(JournalIntent.OnSave) //1.
+                        onIntent(JournalIntent.OnUpdate) //1.
                     })  {
                         Text("수정완료")
                     }
                 }else {
                     Row() {
                         ElevatedButton({
-                            onIntent(JournalIntent.OnUpdate)
+                            onIntent(JournalIntent.OnEditingStart)
                         }) {
                             Text("수정")
                         }

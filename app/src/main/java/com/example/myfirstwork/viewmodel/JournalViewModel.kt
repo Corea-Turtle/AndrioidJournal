@@ -59,12 +59,15 @@ class JournalViewModel(
             JournalIntent.OnDelete -> {
                 delete()
             }
-
-            JournalIntent.OnUpdate -> {
+            JournalIntent.OnEditingStart -> {
                 val text = state.value.todayJournal?.content?: ""
                 _state.update {
                     it.copy(isEditing = true, writingText = text)
                 }
+            }
+
+            JournalIntent.OnUpdate -> {
+               update()
             }
             else -> {}
         }
@@ -87,11 +90,28 @@ class JournalViewModel(
         Log.d("TAG", "delete: ")
 
         this.deletedJournal = state.value.todayJournal
-
+        _state.update {
+            it.copy("")
+        }
         viewModelScope.launch{
             //삭제한다.
             repository.deleteJournal(LocalDate.now().toString())
             _sideEffect.send(JournalSideEffect.ShowUndoSnackbar)
+        }
+    }
+
+    //수정로직
+    private fun update() {
+        Log.d("TAG", "update: ")
+        _state.update{
+            it.copy(isEditing = false)
+        }
+        viewModelScope.launch {
+            repository.updateJournal(
+                date = LocalDate.now().toString(),
+                content = state.value.writingText
+            )
+            _sideEffect.send(JournalSideEffect.ShowToast("수정이 완료되었습니다."))
         }
     }
 
