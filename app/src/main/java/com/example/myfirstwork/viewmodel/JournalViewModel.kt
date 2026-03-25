@@ -12,6 +12,7 @@ import com.example.myfirstwork.mvi.JournalSideEffect
 import com.example.myfirstwork.mvi.JournalState
 import com.example.myfirstwork.mvi.JournalUiMode
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -35,6 +36,9 @@ class JournalViewModel(
 
     init {
         viewModelScope.launch {
+
+            delay(3000)
+
             repository.journals.collect { storedJournals ->
                 Log.d("TAG", "저장된 journals: ${storedJournals}")
 

@@ -10,7 +10,8 @@ import com.example.myfirstwork.data.model.Journal
 enum class JournalUiMode{
     EMPTY,
     EDIT,
-    READ
+    READ,
+    LOADING
 }
 
 
@@ -18,6 +19,6 @@ enum class JournalUiMode{
 data class JournalState(
     val writingText: TextFieldValue = TextFieldValue(),
     val todayJournal: Journal? = null,
-    val uiMode: JournalUiMode = JournalUiMode.READ,
+    val uiMode: JournalUiMode = JournalUiMode.LOADING,
     val journals : List<Journal> = emptyList()
 )

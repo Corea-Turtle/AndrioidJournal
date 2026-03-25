@@ -25,8 +25,7 @@ import com.example.myfirstwork.ui.theme.TextGray
 fun HistorySection(journalList: List<Journal>) {
 
     if(journalList.isEmpty()) {
-        Text("일기 기록이 없습니다.")
-        return
+        EmptyHistory()
     } else {
         LazyColumn {
             stickyHeader {
@@ -36,21 +35,21 @@ fun HistorySection(journalList: List<Journal>) {
                     modifier = Modifier.padding(vertical = 12.dp))
             }
             items(journalList) { journal ->
-                Text("✅ ${journal.date} - ${journal.content}")
+                HistoryItemCard(journal)
             }
         }
     }
 }
 
 @Composable
-private fun HistoryTtemCard(journal: Journal) {
+private fun HistoryItemCard(journal: Journal) {
    Card(shape = RoundedCornerShape(20.dp),
        colors = CardDefaults.cardColors(containerColor = CardBg),
        modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)
    ) {
-       Column() {
-            Text("✅ ${journal.date} - ${journal.content}")
-            Text("✅ ${journal.date} - ${journal.content}")
+       Column(modifier = Modifier.padding(16.dp)) {
+            Text(text = journal.date, fontSize = 12.sp, color = TextGray)
+            Text(text = journal.content)
        }
    }
 }
@@ -62,7 +61,7 @@ private fun EmptyHistory(){
         modifier = Modifier.fillMaxWidth().padding(48.dp)
     ){
         Text("아직 작성된 일기가 없습니다.",
-            fontSize = 18.sp,
+            fontSize = 14.sp,
             color = TextGray
         )
         Spacer(modifier = Modifier.height(6.dp))

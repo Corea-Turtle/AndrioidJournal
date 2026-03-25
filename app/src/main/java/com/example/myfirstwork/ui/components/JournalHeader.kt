@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.myfirstwork.ui.theme.Primary
@@ -26,10 +27,12 @@ fun JournalHeader() {
     Column(horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxWidth()
     ) {
-        Box(modifier = Modifier
+        Box(
+            modifier = Modifier
             .size(48.dp)
             .background(Primary.copy(alpha = 0.15f),
                 shape = RoundedCornerShape(20.dp)),
+            contentAlignment = Alignment.Center
             ){
             Icon(
                 imageVector = Icons.Default.Home,
