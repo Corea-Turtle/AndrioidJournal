@@ -3,6 +3,8 @@ package com.example.myfirstwork.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -15,65 +17,57 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.myfirstwork.mvi.JournalIntent
 import com.example.myfirstwork.mvi.JournalState
+import com.example.myfirstwork.mvi.JournalUiMode
 import java.time.LocalDate
 
 @Composable
-fun JournalContent(state: JournalState,
-                   onIntent: (JournalIntent) -> Unit,
-                   modifier: Modifier) {
+fun JournalContent(
+    state: JournalState,
+    onIntent: (JournalIntent) -> Unit,
+    modifier: Modifier
+) {
     Column(modifier = modifier.padding(16.dp)) {
 
-        Text(text = "오늘의 한줄 / ${LocalDate.now().toString()}")
-        Text(text = "입력된 글자 / ${state.writingText}")
+        JournalHeader()
 
+        Spacer(modifier = Modifier.height(24.dp))
 
-        if(state.todayJournal != null) {
-            Column(modifier = Modifier.background(Color.Yellow)){
-                Text("오늘 작성한 일기 / ${state.todayJournal.date}")
-                Text("오늘 작성한 일기 / ${state.todayJournal.content}")
-                if(state.isEditing) {
-                    TextField(value = state.writingText,
-                        onValueChange = { input ->
-                            onIntent(JournalIntent.OnTextChange(input))
-                        })
-                    ElevatedButton({
-                        onIntent(JournalIntent.OnUpdate) //1.
-                    })  {
-                        Text("수정완료")
-                    }
-                }else {
-                    Row() {
-                        ElevatedButton({
-                            onIntent(JournalIntent.OnEditingStart)
-                        }) {
-                            Text("수정")
-                        }
-                        ElevatedButton({
-                            onIntent(JournalIntent.OnDelete)
-                        }) {
-                            Text("삭제")
-                        }
-                    }
-                }
+        when (state.uiMode) {
+            JournalUiMode.EMPTY -> {
+                AddJournalCard(
+                    content = state.writingText,
+                    onTextChange = {
+                        onIntent(JournalIntent.OnTextChange(it))
+                    },
+                    onSave = {
+                        onIntent(JournalIntent.OnSave)
+                    })
             }
-        } else {
-            TextField(value = state.writingText,
-                onValueChange = { input ->
-                    onIntent(JournalIntent.OnTextChange(input))
+            JournalUiMode.EDIT -> {
+                EditJournalCard(
+                    content = state.writingText,
+                    onTextChange = {
+                    onIntent(JournalIntent.OnTextChange(it))
+                }, onUpdate = {
+                    onIntent(JournalIntent.OnUpdate)
                 })
-            ElevatedButton({
-                onIntent(JournalIntent.OnSave) //1.
-            })  {
-                Text("저장")
+            }
+            JournalUiMode.READ -> {
+                state.todayJournal?.let {
+                    TodayJournalCard(journal = it, onStartEditing = {
+                        onIntent(JournalIntent.OnEditingStart)
+                    }, onDelete = {
+                        onIntent(JournalIntent.OnDelete)
+                    })
+                }
+
+
             }
         }
 
+        HistorySection()
 
-        LazyColumn {
-            items(state.journals) { journal ->
-                Text("✅ ${journal.date} - ${journal.content}")
-            }
-        }
+
 
     }
 }

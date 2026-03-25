@@ -1,6 +1,8 @@
 package com.example.myfirstwork.viewmodel
 
 import android.util.Log
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.myfirstwork.data.model.Journal
@@ -8,6 +10,7 @@ import com.example.myfirstwork.data.repository.JournalRepository
 import com.example.myfirstwork.mvi.JournalIntent
 import com.example.myfirstwork.mvi.JournalSideEffect
 import com.example.myfirstwork.mvi.JournalState
+import com.example.myfirstwork.mvi.JournalUiMode
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -38,8 +41,14 @@ class JournalViewModel(
                 val todayString = LocalDate.now().toString()
                 val todayJournal = storedJournals.find { it.date == todayString }
 
+                val mode = if(todayJournal == null) JournalUiMode.EMPTY else JournalUiMode.READ
+
                 _state.update {
-                    it.copy(journals = storedJournals, todayJournal = todayJournal)
+                    it.copy(
+                        journals = storedJournals,
+                        todayJournal = todayJournal,
+                        uiMode = mode
+                    )
                 }
             }
         }
@@ -49,7 +58,8 @@ class JournalViewModel(
         when (intent) {
             is JournalIntent.OnTextChange -> {
                 _state.update {
-                    it.copy(writingText = intent.userInput)
+                    it.copy(writingText = intent.userInput
+                    )
                 }
             }
             JournalIntent.OnSave -> {
@@ -62,7 +72,8 @@ class JournalViewModel(
             JournalIntent.OnEditingStart -> {
                 val text = state.value.todayJournal?.content?: ""
                 _state.update {
-                    it.copy(isEditing = true, writingText = text)
+                    it.copy(uiMode = JournalUiMode.EDIT,
+                        writingText = TextFieldValue(text = text, selection = TextRange(text.length)))
                 }
             }
 
@@ -91,7 +102,7 @@ class JournalViewModel(
 
         this.deletedJournal = state.value.todayJournal
         _state.update {
-            it.copy("")
+            it.copy(writingText= TextFieldValue(), uiMode = JournalUiMode.EMPTY)
         }
         viewModelScope.launch{
             //삭제한다.
@@ -103,13 +114,14 @@ class JournalViewModel(
     //수정로직
     private fun update() {
         Log.d("TAG", "update: ")
-        _state.update{
-            it.copy(isEditing = false)
+
+        _state.update {
+            it.copy(uiMode = JournalUiMode.READ)
         }
         viewModelScope.launch {
             repository.updateJournal(
                 date = LocalDate.now().toString(),
-                content = state.value.writingText
+                content = state.value.writingText.text
             )
             _sideEffect.send(JournalSideEffect.ShowToast("수정이 완료되었습니다."))
         }
@@ -119,19 +131,12 @@ class JournalViewModel(
     private fun save() {
         Log.d("TAG", "save: ")
         viewModelScope.launch {
-            if(state.value.isEditing) {
-                _state.update {
-                    it.copy(isEditing = false)
-                }
+            _state.update {
+                it.copy(uiMode = JournalUiMode.READ)
             }
             //저장 로직은 레포지토리에 맡긴다.
             repository.saveJournal(date = LocalDate.now().toString(),
-                content = state.value.writingText)
-
-            //일기 데이터 추가하기
-//            _state.update{
-//                it.copy(journals = updatedJournals)
-//            }
+                content = state.value.writingText.text)
 
             _sideEffect.send(JournalSideEffect.ShowSavedToast)
         }
